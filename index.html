@@ -1,0 +1,883 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz de Direito Constitucional</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --correct-color: #2ecc71;
+            --incorrect-color: #e74c3c;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .quiz-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: var(--secondary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .question-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .question-number {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+        
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .option:hover {
+            background-color: #f8f9fa;
+            border-color: var(--secondary-color);
+        }
+        
+        .option.selected {
+            background-color: #e3f2fd;
+            border-color: var(--secondary-color);
+        }
+        
+        .option.correct {
+            background-color: rgba(46, 204, 113, 0.1);
+            border-color: var(--correct-color);
+        }
+        
+        .option.incorrect {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-color: var(--incorrect-color);
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .results-container {
+            text-align: center;
+            padding: 30px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .score {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #f8f9fa;
+        }
+        
+        .correct-answer {
+            color: var(--correct-color);
+            font-weight: 600;
+        }
+        
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+            color: #555;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .timer {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .question-container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Quiz de Direito Constitucional</h1>
+            <p class="subtitle">40 questões aprofundadas sobre Formação Constitucional, Princípios Fundamentais, Direitos Fundamentais e Controle de Constitucionalidade</p>
+        </header>
+        
+        <div class="quiz-info">
+            <div class="timer">Tempo: <span id="time">00:00</span></div>
+            <div>Questão: <span id="current-question">1</span> de <span id="total-questions">40</span></div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        
+        <div id="quiz-content">
+            <div class="question-container">
+                <div class="question-number" id="question-number">Questão 1</div>
+                <div class="question-text" id="question-text"></div>
+                <div class="options-container" id="options-container"></div>
+                <div class="navigation">
+                    <button id="prev-btn" disabled>Anterior</button>
+                    <button id="next-btn">Próxima</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="results-container" class="results-container hidden">
+            <h2>Resultado do Quiz</h2>
+            <div class="score" id="score">Sua pontuação: 0/40</div>
+            <div id="performance-feedback"></div>
+            <button id="restart-btn">Refazer Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Questões do quiz
+        const questions = [
+            {
+                question: "Sobre o processo de formação constitucional brasileiro, é correto afirmar que:",
+                options: [
+                    "A) A primeira constituição brasileira, outorgada em 1824, estabeleceu um regime parlamentarista, com o Imperador exercendo funções meramente simbólicas.",
+                    "B) A Constituição de 1891, primeira da República, adotou o federalismo e o presidencialismo, inspirada no modelo norte-americano.",
+                    "C) A Constituição de 1934, embora avançada em direitos sociais, foi outorgada por Getúlio Vargas sem qualquer participação popular.",
+                    "D) A Constituição de 1967/69, editada durante o regime militar, ampliou significativamente as garantias individuais e os direitos políticos."
+                ],
+                correctAnswer: 1,
+                explanation: "A alternativa B está correta. A Constituição de 1891, primeira da República, adotou efetivamente o federalismo e o presidencialismo, seguindo o modelo norte-americano. As demais alternativas contêm imprecisões históricas: a Constituição de 1824 estabeleceu um regime monárquico com Poder Moderador; a de 1934 foi promulgada por uma Assembleia Constituinte; e a de 1967/69 restringiu, e não ampliou, garantias individuais e direitos políticos."
+            },
+            {
+                question: "Em relação aos princípios fundamentais da CF/88, assinale a alternativa INCORRETA:",
+                options: [
+                    "A) A dignidade da pessoa humana constitui fundamento da República Federativa do Brasil.",
+                    "B) O pluralismo político é um dos fundamentos do Estado Democrático de Direito brasileiro.",
+                    "C) A defesa da paz e a solução pacífica dos conflitos são objetivos fundamentais da República.",
+                    "D) A construção de uma sociedade livre, justa e solidária é princípio que rege o Brasil nas relações internacionais."
+                ],
+                correctAnswer: 3,
+                explanation: "A alternativa D está incorreta. A construção de uma sociedade livre, justa e solidária é um OBJETIVO fundamental da República (art. 3º, I), e não um princípio que rege o Brasil nas relações internacionais (art. 4º). Os princípios que regem o Brasil nas relações internacionais são: independência nacional, prevalência dos direitos humanos, autodeterminação dos povos, não-intervenção, igualdade entre os Estados, defesa da paz, solução pacífica dos conflitos, repúdio ao terrorismo e ao racismo, cooperação entre os povos e concessão de asilo político."
+            },
+            {
+                question: "Sobre a teoria geral dos direitos fundamentais, é correto afirmar que:",
+                options: [
+                    "A) Os direitos fundamentais possuem aplicação imediata, conforme expressamente previsto no texto constitucional.",
+                    "B) A eficácia horizontal dos direitos fundamentais é pacífica na doutrina e na jurisprudência do STF.",
+                    "C) Os tratados internacionais de direitos humanos possuem status infraconstitucional, mesmo quando aprovados conforme o procedimento do §3º do art. 5º.",
+                    "D) O princípio da máxima efetividade não se aplica à interpretação dos direitos fundamentais."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. O §1º do art. 5º da CF/88 estabelece que 'as normas definidoras dos direitos e garantias fundamentais têm aplicação imediata'. Quanto às demais alternativas: B) A eficácia horizontal não é totalmente pacífica, havendo divergências sobre seus limites; C) Os tratados aprovados conforme o §3º do art. 5º possuem status de emenda constitucional; D) O princípio da máxima efetividade é fundamental para a interpretação dos direitos fundamentais."
+            },
+            {
+                question: "No controle de constitucionalidade brasileiro, a arguição de descumprimento de preceito fundamental (ADPF):",
+                options: [
+                    "A) Tem por objetivo evitar ou reparar lesão a preceito fundamental resultante de ato do Poder Público.",
+                    "B) Pode ser utilizada para questionar lei ou ato normativo estadual ou municipal em face da Constituição Estadual.",
+                    "C) É cabível quando houver outra via processual adequada para a tutela do preceito fundamental.",
+                    "D) Tem legitimação ativa restrita aos mesmos entes previstos para a ação direta de inconstitucionalidade."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. Conforme dispõe a Lei 9.882/99, a ADPF tem por objetivo evitar ou reparar lesão a preceito fundamental resultante de ato do Poder Público. As demais alternativas estão incorretas: B) A ADPF só pode ser utilizada em face da Constituição Federal; C) A ADPF é cabível justamente quando não houver outra via processual adequada; D) A legitimação ativa da ADPF é mais ampla que a da ADI, incluindo partido político com representação no Congresso e confederação sindical ou entidade de classe de âmbito nacional."
+            },
+            {
+                question: "Sobre o constitucionalismo social no Brasil, é correto afirmar que:",
+                options: [
+                    "A) Teve sua primeira expressão na Constituição de 1934, que incorporou direitos trabalhistas e previu a intervenção do Estado na ordem econômica.",
+                    "B) Foi introduzido pela Constituição de 1988, que inovou ao prever direitos sociais como educação, saúde e trabalho.",
+                    "C) Surgiu com a Constituição de 1946, que estabeleceu pela primeira vez o voto secreto e universal.",
+                    "D) Foi consagrado na Constituição de 1967, que ampliou significativamente os direitos previdenciários."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A Constituição de 1934 representou a primeira incorporação significativa do constitucionalismo social no Brasil, introduzindo direitos trabalhistas, previdenciários e permitindo a intervenção do Estado na economia. As demais alternativas contêm imprecisões históricas: B) Direitos sociais já estavam presentes em constituições anteriores; C) O voto secreto e universal foi estabelecido pela Constituição de 1934; D) A Constituição de 1967 foi promulgada em um contexto de restrição de direitos."
+            },
+            {
+                question: "No que se refere aos princípios fundamentais da República Federativa do Brasil, assinale a alternativa correta:",
+                options: [
+                    "A) A soberania e a cidadania são valores supremos de uma sociedade fraterna, pluralista e sem preconceitos.",
+                    "B) Os valores sociais do trabalho e da livre iniciativa constituem fundamentos da República.",
+                    "C) A erradicação da pobreza e a redução das desigualdades sociais são fundamentos do Estado Democrático de Direito.",
+                    "D) A prevalência dos direitos humanos é princípio que rege a República em suas relações internacionais."
+                ],
+                correctAnswer: 1,
+                explanation: "A alternativa B está correta. Conforme o art. 1º, IV da CF/88, os valores sociais do trabalho e da livre iniciativa constituem fundamentos da República. As demais alternativas estão incorretas: A) Soberania e cidadania são fundamentos, não valores supremos; C) Erradicação da pobreza é objetivo fundamental, não fundamento; D) Prevalência dos direitos humanos é princípio que rege o Brasil nas relações internacionais, não fundamento da República."
+            },
+            {
+                question: "Sobre a eficácia dos direitos fundamentais nas relações entre particulares (eficácia horizontal), é INCORRETO afirmar que:",
+                options: [
+                    "A) Os direitos fundamentais vinculam diretamente os particulares em determinadas situações.",
+                    "B) A teoria da eficácia horizontal direta defende a aplicação imediata dos direitos fundamentais às relações privadas.",
+                    "C) O STF tem admitido a eficácia horizontal dos direitos fundamentais, especialmente em casos de relações desequilibradas.",
+                    "D) A eficácia horizontal sempre pressupõe a edição de lei que regulamente a matéria."
+                ],
+                correctAnswer: 3,
+                explanation: "A alternativa D está incorreta. A eficácia horizontal não pressupõe necessariamente a edição de lei, podendo ocorrer de forma direta ou indireta. A eficácia horizontal direta defende justamente a aplicação imediata dos direitos fundamentais às relações entre particulares, independentemente de mediação legislativa."
+            },
+            {
+                question: "No controle concentrado de constitucionalidade brasileiro, a ação declaratória de constitucionalidade (ADC):",
+                options: [
+                    "A) Tem por objetivo afastar a insegurança jurídica decorrente de controvérsia judicial sobre a constitucionalidade de lei ou ato normativo.",
+                    "B) Pode ser proposta por qualquer cidadão, mediante demonstração de interesse direto na questão.",
+                    "C) É cabível mesmo quando não houver controvérsia judicial relevante sobre a norma questionada.",
+                    "D) Tem efeito vinculante apenas em relação aos órgãos do Poder Judiciário."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A ADC tem por objetivo precisamente afastar a insegurança jurídica decorrente de controvérsia judicial sobre a constitucionalidade de lei ou ato normativo. As demais alternativas estão incorretas: B) A legitimação ativa da ADC é restrita aos entes elencados no art. 103 da CF; C) A existência de controvérsia judicial relevante é requisito de cabimento; D) O efeito vinculante da ADC alcança também a administração pública direta e indireta."
+            },
+            {
+                question: "Sobre o processo constituinte de 1987-1988, é correto afirmar que:",
+                options: [
+                    "A) Foi convocado exclusivamente para elaborar a nova Constituição, com poderes originários e ilimitados.",
+                    "B) Desenvolveu-se sob regime de exceção, com significativa limitação de debates públicos.",
+                    "C) Adotou o sistema de emendas populares, permitindo a participação direta da sociedade.",
+                    "D) Resultou na primeira Constituição brasileira a prever mecanismos de democracia direta."
+                ],
+                correctAnswer: 2,
+                explanation: "A alternativa C está correta. A Assembleia Nacional Constituinte de 1987-1988 inovou ao adotar o sistema de emendas populares, que permitiu a apresentação de propostas subscritas por eleitores. Quanto às demais alternativas: A) A Constituinte foi convocada pela Emenda Constitucional nº 26/85, com poderes derivados; B) Desenvolveu-se em regime democrático, com ampla participação; D) Mecanismos de democracia direta já estavam previstos em constituições anteriores."
+            },
+            {
+                question: "No que concerne aos direitos e garantias fundamentais, a distinção entre direitos e garantias, segundo a classificação de Rui Barbosa, estabelece que:",
+                options: [
+                    "A) Direitos são as prerrogativas substantivas conferidas aos indivíduos, enquanto garantias são os instrumentos para sua proteção.",
+                    "B) Garantias são os direitos propriamente ditos, enquanto direitos são as formas de exercê-los.",
+                    "C) A distinção não possui relevância prática no ordenamento jurídico brasileiro.",
+                    "D) Direitos e garantias são expressões sinônimas no texto constitucional."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. Segundo a classificação clássica de Rui Barbosa, direitos são as prerrogativas substantivas conferidas aos indivíduos (como liberdade, propriedade, etc.), enquanto garantias são os instrumentos processuais para sua proteção (como habeas corpus, mandado de segurança, etc.)."
+            },
+            {
+                question: "Sobre o controle difuso de constitucionalidade no Brasil, é correto afirmar que:",
+                options: [
+                    "A) Pode ser exercido por qualquer juiz ou tribunal, no âmbito de casos concretos.",
+                    "B) Tem efeito erga omnes e vinculante desde a decisão de primeira instância.",
+                    "C) É cabível apenas para questionar leis federais em face da Constituição Federal.",
+                    "D) Depende de provocação exclusivamente do Ministério Público."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. O controle difuso pode ser exercido por qualquer juiz ou tribunal, no âmbito de casos concretos. As demais alternativas estão incorretas: B) No controle difuso, o efeito é inter partes, podendo tornar-se erga omnes apenas após declaração do STF em recurso extraordinário; C) É cabível para questionar qualquer norma em face da Constituição; D) Pode ser provocado por qualquer parte legítima no processo."
+            },
+            {
+                question: "A respeito da interpretação conforme a Constituição, é INCORRETO afirmar que:",
+                options: [
+                    "A) Consiste em escolher, entre várias interpretações possíveis de uma norma, aquela que a torna constitucional.",
+                    "B) É técnica de controle de constitucionalidade que evita a declaração de inconstitucionalidade.",
+                    "C) Pode ser aplicada pelo Judiciário mesmo quando a norma possui apenas uma interpretação possível.",
+                    "D) Pressupõe que a norma admita mais de uma interpretação, sendo pelo menos uma delas constitucional."
+                ],
+                correctAnswer: 2,
+                explanation: "A alternativa C está incorreta. A interpretação conforme a Constituição pressupõe exatamente que a norma admita mais de uma interpretação possível. Se há apenas uma interpretação possível e ela é inconstitucional, o tribunal deve declarar a inconstitucionalidade da norma."
+            },
+            {
+                question: "Sobre o princípio da dignidade da pessoa humana na CF/88, assinale a alternativa correta:",
+                options: [
+                    "A) Constitui valor fundamental que serve como parâmetro para a interpretação de todo o ordenamento jurídico.",
+                    "B) Tem aplicação restrita aos direitos individuais, não se estendendo às relações sociais e econômicas.",
+                    "C) É princípio de eficácia contida, dependendo de regulamentação legal para produzir efeitos.",
+                    "D) Configura direito absoluto, não admitindo qualquer tipo de relativização."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. O princípio da dignidade da pessoa humana é valor fundamental que serve como parâmetro para interpretação de todo o ordenamento jurídico. As demais alternativas estão incorretas: B) Estende-se a todas as dimensões da vida humana; C) Tem aplicação imediata; D) Não é direito absoluto, podendo sofrer relativizações em situações específicas."
+            },
+            {
+                question: "No sistema brasileiro de controle de constitucionalidade, a súmula vinculante:",
+                options: [
+                    "A) Pode ser editada pelo STF para vincular os demais órgãos do Poder Judiciário e a Administração Pública.",
+                    "B) Tem efeito retroativo, alcançando casos já julgados definitivamente.",
+                    "C) Dispensa a observância do contraditório e da ampla defesa em seu processo de elaboração.",
+                    "D) Pode versar sobre qualquer matéria jurídica, independentemente de repetitividade de casos."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A súmula vinculante, prevista no art. 103-A da CF, pode ser editada pelo STF para vincular os demais órgãos do Poder Judiciário e a Administração Pública. As demais alternativas estão incorretas: B) Não tem efeito retroativo; C) Deve observar o contraditório e a ampla defesa; D) Só pode versar sobre matéria constitucional e pressupõe repetitividade de casos."
+            },
+            {
+                question: "Sobre as gerações (ou dimensões) dos direitos fundamentais, é correto afirmar que:",
+                options: [
+                    "A) Os direitos de primeira geração têm como titular o indivíduo, oponíveis principalmente contra o Estado.",
+                    "B) Os direitos de segunda geração correspondem aos direitos de solidariedade ou fraternidade.",
+                    "C) Os direitos de quinta geração já são reconhecidos pacificamente pela doutrina majoritária.",
+                    "D) A classificação em gerações implica hierarquia entre os diferentes tipos de direitos."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. Os direitos de primeira geração (liberdades públicas) têm como titular o indivíduo e são oponíveis principalmente contra o Estado. Quanto às demais: B) Direitos de solidariedade correspondem à terceira geração; C) A quinta geração não é pacificamente reconhecida; D) A classização não implica hierarquia, mas sucessão histórica."
+            },
+            {
+                question: "No que se refere à arguição de descumprimento de preceito fundamental (ADPF), é correto afirmar que:",
+                options: [
+                    "A) Pode ser utilizada para questionar atos do Poder Judiciário que violem preceito fundamental.",
+                    "B) É cabível quando existir outro meio eficaz de sanar a lesividade.",
+                    "C) Tem como objeto apenas leis ou atos normativos federais.",
+                    "D) Seu julgamento pelo STF produz efeitos ex tunc."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A ADPF pode ser utilizada para questionar atos de qualquer dos Poderes, inclusive do Judiciário, que violem preceito fundamental. As demais alternativas estão incorretas: B) É cabível justamente quando não existir outro meio eficaz; C) Pode ter como objeto lei ou ato normativo federal, estadual ou municipal; D) Os efeitos da decisão são moduláveis pelo STF."
+            },
+            {
+                question: "Sobre o princípio republicano na CF/88, é INCORRETO afirmar que:",
+                options: [
+                    "A) Implica necessariamente a temporariedade dos mandatos eletivos.",
+                    "B) Estabelece a igualdade formal entre os cidadãos perante a lei.",
+                    "C) Pressupõe a divisão de poderes e o sistema de freios e contrapesos.",
+                    "D) Configura cláusula pétrea, insuscetível de abolição por emenda constitucional."
+                ],
+                correctAnswer: 1,
+                explanation: "A alternativa B está incorreta. A igualdade formal entre os cidadãos perante a lei decorre do princípio da isonomia, não sendo elemento definidor do princípio republicano. O princípio republicano caracteriza-se principalmente pela eletividade e temporariedade dos mandatos, prestação de contas e interesse público."
+            },
+            {
+                question: "No controle concentrado de constitucionalidade, a intervenção de terceiros no processo:",
+                options: [
+                    "A) É admitida por meio de amicus curiae, que pode apresentar memoriais e participar de sustentação oral.",
+                    "B) Só é permitida aos legitimados ativos previstos no art. 103 da CF.",
+                    "C) Depende de demonstrar interesse jurídico direto na causa.",
+                    "D) É restrita aos órgãos do Ministério Público."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. No controle concentrado, é admitida a intervenção de terceiros por meio de amicus curiae, que pode apresentar memoriais e, em alguns casos, participar de sustentação oral. As demais alternativas estão incorretas: B) A intervenção é mais ampla; C) O amicus curiae não precisa demonstrar interesse direto; D) Não se restringe ao MP."
+            },
+            {
+                question: "Sobre os direitos sociais na CF/88, assinale a alternativa correta:",
+                options: [
+                    "A) Possuem aplicação imediata, nos termos do art. 5º, §1º, da Constituição.",
+                    "B) São direitos de defesa, oponíveis principalmente contra o Estado.",
+                    "C) Configuram normas programáticas, dependentes sempre de regulamentação legal.",
+                    "D) Incluem direitos como educação, saúde, trabalho e propriedade."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. Os direitos sociais, como espécie de direitos fundamentais, possuem aplicação imediata conforme o art. 5º, §1º da CF. Quanto às demais: B) São direitos prestacionais, não apenas de defesa; C) Não são meramente programáticos; D) A propriedade é direito individual, não social."
+            },
+            {
+                question: "No sistema brasileiro, a declaração de inconstitucionalidade sem redução de texto:",
+                options: [
+                    "A) É técnica utilizada quando a norma é inconstitucional em sua totalidade.",
+                    "B) Permite ao tribunal declarar a inconstitucionalidade apenas de determinada interpretação.",
+                    "C) Consiste em excluir palavras ou expressões do texto normativo.",
+                    "D) É modalidade de inconstitucionalidade parcial."
+                ],
+                correctAnswer: 1,
+                explanation: "A alternativa B está correta. A declaração de inconstitucionalidade sem redução de texto permite ao tribunal declarar inconstitucional apenas determinada interpretação da norma, preservando outras interpretações possíveis. Não há alteração no texto da lei, apenas na sua interpretação."
+            },
+            {
+                question: "Sobre o federalismo brasileiro na CF/88, é correto afirmar que:",
+                options: [
+                    "A) Adota o modelo cooperativo, com repartição de competências entre União, Estados, DF e Municípios.",
+                    "B) Estabelece a simetria entre todos os entes federativos, com idênticas competências.",
+                    "C) Prevê a possibilidade de secessão dos Estados-membros, mediante plebiscito.",
+                    "D) Configura federação por agregação, formada pela união de Estados soberanos."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. O federalismo brasileiro adota o modelo cooperativo, com repartição de competências entre União, Estados, DF e Municípios. As demais alternativas estão incorretas: B) Há assimetria nas competências; C) A CF veda expressamente a secessão; D) O Brasil é federação por desagregação (foi unitário antes de federal)."
+            },
+            {
+                question: "No que se refere à reserva do possível, é correto afirmar que:",
+                options: [
+                    "A) Constitui limite à efetivação dos direitos fundamentais sociais, dependendo de disponibilidade orçamentária.",
+                    "B) É princípio que garante a máxima efetividade dos direitos fundamentais.",
+                    "C) Dispensa o Estado do cumprimento de suas obrigações constitucionais em caso de crise financeira.",
+                    "D) Aplica-se apenas aos direitos individuais, não aos direitos sociais."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A reserva do possível constitui efetivamente limite à efetivação dos direitos fundamentais sociais, dependendo de disponibilidade orçamentária e razoabilidade da pretensão. As demais alternativas estão incorretas: B) É limite, não garantia; C) Não dispensa totalmente o Estado; D) Aplica-se principalmente aos direitos sociais."
+            },
+            {
+                question: "Sobre a ação direta de inconstitucionalidade por omissão (ADO), é INCORRETO afirmar que:",
+                options: [
+                    "A) Tem por objetivo combater a inconstitucionalidade por omissão do Poder Público.",
+                    "B) Pode ser proposta para exigir o cumprimento de dever constitucional de legislar.",
+                    "C) Sua procedência resulta na edição direta da norma pelo Poder Judiciário.",
+                    "D) O STF pode comunicar o fato ao órgão competente para adoção das providências necessárias."
+                ],
+                correctAnswer: 2,
+                explanation: "A alternativa C está incorreta. Na ADO, o STF não edita diretamente a norma omissa, mas declara a inconstitucionalidade por omissão e comunica o fato ao órgão competente para adoção das providências. Em alguns casos, pode fixar prazo para o cumprimento."
+            },
+            {
+                question: "No que concerne à interpretação dos direitos fundamentais, o princípio da concordância prática ou harmonização:",
+                options: [
+                    "A) Determina que, em caso de conflito entre direitos fundamentais, deve-se buscar solução que preserve o máximo possível de ambos.",
+                    "B) Estabelece hierarquia entre os diferentes direitos fundamentais.",
+                    "C) Pressupõe que os direitos fundamentais são absolutos e não admitem restrições.",
+                    "D) Determina a prevalência sempre dos direitos coletivos sobre os individuais."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. O princípio da concordância prática determina que, em caso de conflito entre direitos fundamentais, deve-se buscar solução que preserve o máximo possível de ambos, harmonizando-os. Não estabelece hierarquia rígida nem pressupõe caráter absoluto dos direitos."
+            },
+            {
+                question: "Sobre os efeitos temporais das decisões em controle concentrado de constitucionalidade, a modulação temporal:",
+                options: [
+                    "A) Pode ser utilizada pelo STF para atribuir efeitos prospectivos à declaração de inconstitucionalidade.",
+                    "B) É regra no sistema brasileiro, aplicando-se automaticamente a todos os casos.",
+                    "C) Dispensa a motivação específica por parte do tribunal.",
+                    "D) Tem previsão expressa apenas para a ADPF, não se aplicando a outras ações."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A modulação temporal pode ser utilizada pelo STF para atribuir efeitos prospectivos à declaração de inconstitucionalidade, com fundamento na segurança jurídica ou excepcional interesse social. É medida excepcional que depende de motivação específica e pode ser aplicada em diferentes ações de controle concentrado."
+            },
+            {
+                question: "Sobre o princípio da separação de poderes na CF/88, é correto afirmar que:",
+                options: [
+                    "A) Adota o sistema de freios e contrapesos, com interferências recíprocas entre os Poderes.",
+                    "B) Estabelece separação rígida, sem qualquer possibilidade de interferência entre os Poderes.",
+                    "C) Confere supremacia ao Poder Judiciário sobre os demais Poderes.",
+                    "D) Prevê a subordinação do Poder Executivo ao Legislativo em todas as matérias."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A CF/88 adota o sistema de freios e contrapesos, com interferências recíprocas entre os Poderes. As demais alternativas estão incorretas: B) A separação não é rígida; C) Não há supremacia de um Poder sobre outro; D) Não há subordinação geral do Executivo ao Legislativo."
+            },
+            {
+                question: "No que se refere à eficácia dos direitos fundamentais, a doutrina da aplicabilidade imediata:",
+                options: [
+                    "A) Foi expressamente adotada pelo §1º do art. 5º da CF/88.",
+                    "B) Depende de regulamentação legislativa para produzir efeitos.",
+                    "C) Aplica-se apenas aos direitos individuais, não aos sociais.",
+                    "D) É técnica interpretativa rejeitada pela jurisprudência do STF."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. O §1º do art. 5º da CF/88 estabelece expressamente que 'as normas definidoras dos direitos e garantias fundamentais têm aplicação imediata'. As demais alternativas estão incorretas: B) Não depende de regulamentação; C) Aplica-se a todos os direitos fundamentais; D) É amplamente aceita pelo STF."
+            },
+            {
+                question: "Sobre a legitimação ativa para propositura da ação direta de inconstitucionalidade (ADI), assinale a alternativa correta:",
+                options: [
+                    "A) Inclui partido político com representação no Congresso Nacional.",
+                    "B) Abrange qualquer cidadão, por meio de ação popular.",
+                    "C) Restringe-se ao Presidente da República e às Mesas das Casas Legislativas.",
+                    "D) Compreende exclusivamente entes federativos e o Ministério Público."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A legitimação ativa para ADI inclui partido político com representação no Congresso Nacional, conforme art. 103 da CF. As demais alternativas estão incorretas: B) Cidadão comum não tem legitimação para ADI; C) A legitimação é mais ampla; D) Inclui outros entes além desses."
+            },
+            {
+                question: "No que concerne aos limites aos direitos fundamentais, a teoria do núcleo essencial:",
+                options: [
+                    "A) Estabelece parcela intangível do direito que não pode ser suprimida por restrições.",
+                    "B) Permite a restrição total do direito em casos de estado de sítio.",
+                    "C) Considera que os direitos fundamentais podem ser totalmente relativizados pelo legislador.",
+                    "D) É teoria rejeitada pela doutrina e jurisprudência brasileiras."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A teoria do núcleo essencial estabelece que existe uma parcela intangível do direito fundamental que não pode ser suprimida por restrições, sob pena de esvaziamento do próprio direito. É teoria aceita pela doutrina e jurisprudência brasileiras."
+            },
+            {
+                question: "Sobre a mutação constitucional, é correto afirmar que:",
+                options: [
+                    "A) Consiste na alteração informal do significado da norma constitucional sem modificação do texto.",
+                    "B) É forma de reforma constitucional que depende de emenda à Constituição.",
+                    "C) Configura espécie de controle de constitucionalidade exercido pelo Poder Legislativo.",
+                    "D) Tem efeitos temporários, até que o STF se manifeste sobre a matéria."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A mutação constitucional consiste na alteração informal do significado da norma constitucional sem modificação do texto, por meio da interpretação e da prática constitucional. Não depende de emenda e não é forma de controle de constitucionalidade."
+            },
+            {
+                question: "No sistema brasileiro, a reclamação constitucional:",
+                options: [
+                    "A) É instrumento para preservar a autoridade das decisões do STF.",
+                    "B) Tem por objetivo principal declarar a inconstitucionalidade de leis.",
+                    "C) Pode ser proposta por qualquer pessoa, independentemente de interesse.",
+                    "D) Substitui os recursos ordinários em matéria constitucional."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A reclamação constitucional é instrumento para preservar a autoridade das decisões do STF, garantindo sua observância por outros órgãos do Judiciário ou da Administração. Não se confunde com ação de inconstitucionalidade e exige demonstração de interesse."
+            },
+            {
+                question: "Sobre o princípio da proporcionalidade na aplicação dos direitos fundamentais, é INCORRETO afirmar que:",
+                options: [
+                    "A) Compreende os subprincípios da adequação, necessidade e proporcionalidade em sentido estrito.",
+                    "B) É utilizado para aferir a legitimidade das restrições a direitos fundamentais.",
+                    "C) Configura cláusula pétrea expressamente prevista no texto constitucional.",
+                    "D) Desempenha importante papel no controle de políticas públicas."
+                ],
+                correctAnswer: 2,
+                explanation: "A alternativa C está incorreta. O princípio da proporcionalidade, embora amplamente reconhecido pela doutrina e jurisprudência, não está expressamente previsto como cláusula pétrea no texto constitucional. É princípio implícito decorrente do Estado Democrático de Direito."
+            },
+            {
+                question: "No que se refere à interpretação constitucional, a máxima 'interpretação conforme a Constituição':",
+                options: [
+                    "A) Prioriza as interpretações que preservem a constitucionalidade da norma.",
+                    "B) Determina que as leis devem ser interpretadas de forma restritiva.",
+                    "C) Estabelece a primazia da letra da lei sobre o espírito da Constituição.",
+                    "D) É técnica aplicável apenas em controle difuso de constitucionalidade."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A máxima 'interpretação conforme a Constituição' prioriza as interpretações que preservem a constitucionalidade da norma, entre várias interpretações possíveis. Não determina interpretação restritiva e é aplicável tanto no controle difuso quanto no concentrado."
+            },
+            {
+                question: "Sobre os direitos políticos na CF/88, assinale a alternativa correta:",
+                options: [
+                    "A) Incluem o direito de votar e ser votado, além de participar da organização do poder político.",
+                    "B) São restritos aos brasileiros natos, excluídos os naturalizados.",
+                    "C) Configuram direitos de primeira geração, com caráter meramente defensivo.",
+                    "D) Dependem de regulamentação infraconstitucional para produzirem efeitos."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. Os direitos políticos incluem efetivamente o direito de votar e ser votado, além de participar da organização do poder político. As demais alternativas estão incorretas: B) Estendem-se aos naturalizados; C) Têm dimensão positiva de participação; D) Possuem aplicação imediata."
+            },
+            {
+                question: "No controle de constitucionalidade brasileiro, a teoria dos poderes implícitos:",
+                options: [
+                    "A) Fundamenta a competência do STF para declarar a inconstitucionalidade de leis.",
+                    "B) É utilizada para afastar a inconstitucionalidade de normas que disciplinam matérias conexas.",
+                    "C) Estabelece limites à atuação do Poder Judiciário em matéria constitucional.",
+                    "D) Configura técnica de interpretação restritiva da Constituição."
+                ],
+                correctAnswer: 1,
+                explanation: "A alternativa B está correta. A teoria dos poderes implícitos é utilizada para afastar a inconstitucionalidade de normas que disciplinam matérias conexas às expressamente previstas na Constituição, desde que necessárias ao exercício das competências constitucionais."
+            },
+            {
+                question: "Sobre o princípio da igualdade na CF/88, é correto afirmar que:",
+                options: [
+                    "A) Proíbe discriminações arbitrárias, mas permite tratamento diferenciado quando justificado.",
+                    "B) Estabelece tratamento uniforme para todas as pessoas, sem exceções.",
+                    "C) Aplica-se apenas aos brasileiros, não se estendendo aos estrangeiros.",
+                    "D) Configura direito absoluto, não admitindo qualquer tipo de distinção."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. O princípio da igualdade proíbe discriminações arbitrárias, mas permite tratamento diferenciado quando justificado por critérios razoáveis e objetivos. Não estabelece tratamento uniforme absoluto e aplica-se a todas as pessoas sob jurisdição brasileira."
+            },
+            {
+                question: "No que se refere à coisa julgada inconstitucional, o STF:",
+                options: [
+                    "A) Admite relativização em casos excepcionais, para preservar supremacia constitucional.",
+                    "B) Considera intangível em qualquer hipótese, por força do princípio da segurança jurídica.",
+                    "C) Permite seu desfazimento apenas por meio de ação rescisória no prazo de dois anos.",
+                    "D) Reconhece sua impenetrabilidade mesmo quando ofende norma de eficácia contida."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. O STF admite a relativização da coisa julgada em casos excepcionais, para preservar a supremacia constitucional, especialmente quando a decisão viola norma de eficácia plena ou ofende princípio constitucional sensível."
+            },
+            {
+                question: "Sobre a intervenção federal nos Estados-membros, é correto afirmar que:",
+                options: [
+                    "A) Está prevista na CF como medida excepcional para preservação da ordem constitucional.",
+                    "B) Pode ser decretada pelo Presidente da República sem qualquer controle judicial.",
+                    "C) Configura forma de controle de constitucionalidade difuso.",
+                    "D) É instrumento ordinário de coordenação da federação brasileira."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A intervenção federal está prevista na CF como medida excepcional para preservação da ordem constitucional. Está sujeita a controles legislativo e judicial e não configura forma de controle de constitucionalidade."
+            },
+            {
+                question: "No que concerne à eficácia horizontal dos direitos fundamentais, a doutrina da state action:",
+                options: [
+                    "A) Restringe a aplicação dos direitos fundamentais às relações em que haja envolvimento estatal.",
+                    "B) Amplia a aplicação dos direitos fundamentais a todas as relações privadas.",
+                    "C) É teoria rejeitada integralmente pelo ordenamento jurídico brasileiro.",
+                    "D) Estabelece hierarquia entre direitos fundamentais de diferentes gerações."
+                ],
+                correctAnswer: 0,
+                explanation: "A alternativa A está correta. A doutrina da state action, de origem norte-americana, restringe a aplicação dos direitos fundamentais às relações em que haja envolvimento estatal significativo. No Brasil, predomina entendimento mais amplo de eficácia horizontal."
+            },
+            {
+                question: "Sobre o mandado de injunção na CF/88, é INCORRETO afirmar que:",
+                options: [
+                    "A) Visa suprir a omissão legislativa que inviabilize o exercício de direitos constitucionais.",
+                    "B) Pode ser concedido para regulamentar norma constitucional de eficácia limitada.",
+                    "C) Tem eficácia inter partes, não produzindo efeitos gerais.",
+                    "D) É cabível apenas para direitos individuais, excluídos os coletivos."
+                ],
+                correctAnswer: 3,
+                explanation: "A alternativa D está incorreta. O mandado de injunção é cabível para direitos individuais e coletivos, conforme entendimento do STF. As demais alternativas estão corretas: A) Visa suprir omissão legislativa; B) Pode regulamentar norma de eficácia limitada; C) Tradicionalmente tem eficácia inter partes, embora haja discussão sobre modulação de efeitos."
+            }
+        ];
+
+        // Variáveis de controle do quiz
+        let currentQuestionIndex = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let score = 0;
+        let startTime;
+        let timerInterval;
+
+        // Elementos DOM
+        const questionNumberElement = document.getElementById('question-number');
+        const questionTextElement = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const prevButton = document.getElementById('prev-btn');
+        const nextButton = document.getElementById('next-btn');
+        const progressElement = document.getElementById('progress');
+        const currentQuestionElement = document.getElementById('current-question');
+        const totalQuestionsElement = document.getElementById('total-questions');
+        const quizContent = document.getElementById('quiz-content');
+        const resultsContainer = document.getElementById('results-container');
+        const scoreElement = document.getElementById('score');
+        const performanceFeedbackElement = document.getElementById('performance-feedback');
+        const restartButton = document.getElementById('restart-btn');
+        const timeElement = document.getElementById('time');
+
+        // Inicializar quiz
+        function initQuiz() {
+            totalQuestionsElement.textContent = questions.length;
+            startTimer();
+            showQuestion();
+            
+            // Event listeners
+            prevButton.addEventListener('click', showPreviousQuestion);
+            nextButton.addEventListener('click', showNextQuestion);
+            restartButton.addEventListener('click', restartQuiz);
+        }
+
+        // Mostrar questão atual
+        function showQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            
+            // Atualizar número da questão
+            questionNumberElement.textContent = `Questão ${currentQuestionIndex + 1}`;
+            currentQuestionElement.textContent = currentQuestionIndex + 1;
+            
+            // Atualizar texto da questão
+            questionTextElement.textContent = currentQuestion.question;
+            
+            // Atualizar opções
+            optionsContainer.innerHTML = '';
+            currentQuestion.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                
+                // Marcar opção selecionada anteriormente
+                if (userAnswers[currentQuestionIndex] === index) {
+                    optionElement.classList.add('selected');
+                }
+                
+                optionElement.textContent = option;
+                optionElement.addEventListener('click', () => selectOption(index));
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Atualizar botões de navegação
+            prevButton.disabled = currentQuestionIndex === 0;
+            
+            // Atualizar barra de progresso
+            updateProgressBar();
+        }
+
+        // Selecionar opção
+        function selectOption(optionIndex) {
+            userAnswers[currentQuestionIndex] = optionIndex;
+            
+            // Atualizar visual das opções
+            const options = document.querySelectorAll('.option');
+            options.forEach((option, index) => {
+                option.classList.remove('selected');
+                if (index === optionIndex) {
+                    option.classList.add('selected');
+                }
+            });
+        }
+
+        // Mostrar questão anterior
+        function showPreviousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion();
+            }
+        }
+
+        // Mostrar próxima questão
+        function showNextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                showQuestion();
+            } else {
+                // Última questão - mostrar resultados
+                showResults();
+            }
+        }
+
+        // Atualizar barra de progresso
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressElement.style.width = `${progress}%`;
+        }
+
+        // Mostrar resultados
+        function showResults() {
+            clearInterval(timerInterval);
+            
+            // Calcular pontuação
+            score = 0;
+            questions.forEach((question, index) => {
+                if (userAnswers[index] === question.correctAnswer) {
+                    score++;
+                }
+            });
+            
+            // Atualizar elementos de resultado
+            scoreElement.textContent = `Sua pontuação: ${score}/${questions.length}`;
+            
+            // Feedback de desempenho
+            let feedback = '';
+            if (score >= 36) {
+                feedback = 'Excelente! Você demonstrou domínio avançado dos temas constitucionais.';
+            } else if (score >= 30) {
+                feedback = 'Muito bom! Seu conhecimento sobre direito constitucional é sólido.';
+            } else if (score >= 24) {
+                feedback = 'Bom desempenho! Você tem boa base, mas pode aprofundar alguns temas.';
+            } else if (score >= 18) {
+                feedback = 'Desempenho regular. Recomendo revisar os principais conceitos constitucionais.';
+            } else {
+                feedback = 'É necessário estudar mais os fundamentos do direito constitucional.';
+            }
+            
+            performanceFeedbackElement.textContent = feedback;
+            
+            // Mostrar container de resultados e ocultar quiz
+            quizContent.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+        }
+
+        // Reiniciar quiz
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            
+            // Reiniciar timer
+            clearInterval(timerInterval);
+            startTimer();
+            
+            // Mostrar quiz e ocultar resultados
+            resultsContainer.classList.add('hidden');
+            quizContent.classList.remove('hidden');
+            
+            showQuestion();
+        }
+
+        // Timer do quiz
+        function startTimer() {
+            startTime = new Date();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            const currentTime = new Date();
+            const elapsedTime = new Date(currentTime - startTime);
+            
+            const minutes = elapsedTime.getMinutes().toString().padStart(2, '0');
+            const seconds = elapsedTime.getSeconds().toString().padStart(2, '0');
+            
+            timeElement.textContent = `${minutes}:${seconds}`;
+        }
+
+        // Inicializar quando a página carregar
+        window.addEventListener('DOMContentLoaded', initQuiz);
+    </script>
+</body>
+</html>
